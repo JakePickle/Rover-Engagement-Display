@@ -64,7 +64,7 @@
             {
                 return _model._listeningPort;
             }
-            private set
+            set
             {
                 _model._listeningPort = value;
                 NotifyOfPropertyChange(() => ListeningPort);
@@ -95,8 +95,9 @@
         {
             _server.Stop();
             IsListening = false;
-            foreach (TcpConnection client in _connections)
-                client.Close();
+            var connectionCopy = new List<TcpConnection>(_connections); //Use a copy because we may modify it while removing stuff and that breaks the foreach
+            foreach (TcpConnection c in connectionCopy)
+                c.Close();
             _controlCenter.Console.WriteToConsole("Server Stopped");
         }
 
@@ -108,13 +109,20 @@
                 while (IsListening)
                 {
                     var client = await _server.AcceptTcpClientAsync();
-                    _connections.Add(new TcpConnection(client, _controlCenter));
+                    var conn = new TcpConnection(this, client, _controlCenter);
+                    _connections.Add(conn);
+                    conn.Connect();
                 }
             }
             catch (ObjectDisposedException)
             {
                 //disregard - server stopped listening
             }
+        }
+
+        public void CloseConnection(TcpConnection connection)
+        {
+            _connections.Remove(connection);
         }
     }
 }

@@ -10,6 +10,7 @@
     using System.Collections.ObjectModel;
     using System.Linq;
     using System.Timers;
+    using System.Threading.Tasks;
 
     public class InputViewModel : PropertyChangedBase
     {
@@ -30,6 +31,30 @@
                 NotifyOfPropertyChange(() => SerialReadSpeed);
             }
         }
+        public bool AutoDeadzone
+        {
+            get
+            {
+                return Model.AutoDeadzone;
+            }
+            set
+            {
+                Model.AutoDeadzone = value;
+                NotifyOfPropertyChange(() => AutoDeadzone);
+            }
+        }
+        public int ManualDeadzone
+        {
+            get
+            {
+                return Model.ManualDeadzone;
+            }
+            set
+            {
+                Model.ManualDeadzone = value;
+                NotifyOfPropertyChange(() => ManualDeadzone);
+            }
+        }
 
         public ObservableCollection<IControllerMode> ControllerModes
         {
@@ -48,6 +73,7 @@
             {
                 Model.CurrentModeIndex = value;
                 NotifyOfPropertyChange(() => CurrentModeIndex);
+                _controlCenter.StateManager.CurrentControlMode = ControllerModes[CurrentModeIndex].Name;
             }
         }
 
@@ -61,9 +87,9 @@
             set
             {
                 Model.Connected = value;
-                NotifyOfPropertyChangeThreadSafe(() => Connected);
+                NotifyOfPropertyChange(() => Connected);
                 _controlCenter.StateManager.ControllerIsConnected = value;
-                NotifyOfPropertyChangeThreadSafe(() => ConnectionStatus);
+                NotifyOfPropertyChange(() => ConnectionStatus);
             }
         }
         public string ConnectionStatus
@@ -82,7 +108,7 @@
             set
             {
                 Model.JoyStick1X = value;
-                NotifyOfPropertyChangeThreadSafe(() => JoyStick1X);
+                NotifyOfPropertyChange(() => JoyStick1X);
             }
         }
         public float JoyStick1Y
@@ -94,7 +120,7 @@
             set
             {
                 Model.JoyStick1Y = value;
-                NotifyOfPropertyChangeThreadSafe(() => JoyStick1Y);
+                NotifyOfPropertyChange(() => JoyStick1Y);
             }
         }
         public float JoyStick2X
@@ -106,7 +132,7 @@
             set
             {
                 Model.JoyStick2X = value;
-                NotifyOfPropertyChangeThreadSafe(() => JoyStick2X);
+                NotifyOfPropertyChange(() => JoyStick2X);
             }
         }
         public float JoyStick2Y
@@ -118,31 +144,31 @@
             set
             {
                 Model.JoyStick2Y = value;
-                NotifyOfPropertyChangeThreadSafe(() => JoyStick2Y);
+                NotifyOfPropertyChange(() => JoyStick2Y);
             }
         }
         public float LeftTrigger
         {
             get
             {
-                return -(Model.LeftTrigger * 180) - 90;
+                return Model.LeftTrigger;
             }
             set
             {
                 Model.LeftTrigger = value;
-                NotifyOfPropertyChangeThreadSafe(() => LeftTrigger);
+                NotifyOfPropertyChange(() => LeftTrigger);
             }
         }
         public float RightTrigger
         {
             get
             {
-                return (Model.RightTrigger * 180) - 90;
+                return Model.RightTrigger;
             }
             set
             {
                 Model.RightTrigger = value;
-                NotifyOfPropertyChangeThreadSafe(() => RightTrigger);
+                NotifyOfPropertyChange(() => RightTrigger);
             }
         }
         public bool ButtonA
@@ -153,8 +179,9 @@
             }
             set
             {
+                DebouncedButtonA = !Model.ButtonA && value;
                 Model.ButtonA = value;
-                NotifyOfPropertyChangeThreadSafe(() => ButtonA);
+                NotifyOfPropertyChange(() => ButtonA);
             }
         }
         public bool ButtonB
@@ -165,8 +192,9 @@
             }
             set
             {
+                DebouncedButtonB = !Model.ButtonB && value;
                 Model.ButtonB = value;
-                NotifyOfPropertyChangeThreadSafe(() => ButtonB);
+                NotifyOfPropertyChange(() => ButtonB);
             }
         }
         public bool ButtonX
@@ -177,8 +205,9 @@
             }
             set
             {
+                DebouncedButtonX = !Model.ButtonX && value;
                 Model.ButtonX = value;
-                NotifyOfPropertyChangeThreadSafe(() => ButtonX);
+                NotifyOfPropertyChange(() => ButtonX);
             }
         }
         public bool ButtonY
@@ -189,8 +218,9 @@
             }
             set
             {
+                DebouncedButtonY = !Model.ButtonY && value;
                 Model.ButtonY = value;
-                NotifyOfPropertyChangeThreadSafe(() => ButtonY);
+                NotifyOfPropertyChange(() => ButtonY);
             }
         }
         public bool ButtonRb
@@ -201,8 +231,9 @@
             }
             set
             {
+                DebouncedButtonRb = !Model.ButtonRb && value;
                 Model.ButtonRb = value;
-                NotifyOfPropertyChangeThreadSafe(() => ButtonRb);
+                NotifyOfPropertyChange(() => ButtonRb);
             }
         }
         public bool ButtonLb
@@ -213,8 +244,9 @@
             }
             set
             {
+                DebouncedButtonLb = !Model.ButtonLb && value;
                 Model.ButtonLb = value;
-                NotifyOfPropertyChangeThreadSafe(() => ButtonLb);
+                NotifyOfPropertyChange(() => ButtonLb);
             }
         }
         public bool ButtonRs
@@ -225,8 +257,9 @@
             }
             set
             {
+                DebouncedButtonRs = !Model.ButtonRs && value;
                 Model.ButtonRs = value;
-                NotifyOfPropertyChangeThreadSafe(() => ButtonRs);
+                NotifyOfPropertyChange(() => ButtonRs);
             }
         }
         public bool ButtonLs
@@ -237,8 +270,9 @@
             }
             set
             {
+                DebouncedButtonLs = !Model.ButtonLs && value;
                 Model.ButtonLs = value;
-                NotifyOfPropertyChangeThreadSafe(() => ButtonLs);
+                NotifyOfPropertyChange(() => ButtonLs);
             }
         }
         public bool ButtonStart
@@ -249,10 +283,9 @@
             }
             set
             {
-                if (Model.ButtonStart != value && value)
-                    NextControlMode();
+                DebouncedButtonStart = !Model.ButtonStart && value;
                 Model.ButtonStart = value;
-                NotifyOfPropertyChangeThreadSafe(() => ButtonStart);
+                NotifyOfPropertyChange(() => ButtonStart);
             }
         }
         public bool ButtonBack
@@ -263,10 +296,132 @@
             }
             set
             {
-                if (Model.ButtonBack != value && value)
-                    PreviousControlMode();
+                DebouncedButtonBack = !Model.ButtonBack && value;
                 Model.ButtonBack = value;
-                NotifyOfPropertyChangeThreadSafe(() => ButtonBack);
+                NotifyOfPropertyChange(() => ButtonBack);
+            }
+        }
+        public bool DebouncedButtonA
+        {
+            get
+            {
+                return Model.ButtonADebounced;
+            }
+            set
+            {
+                Model.ButtonADebounced = value;
+                NotifyOfPropertyChange(() => DebouncedButtonA);
+            }
+        }
+        public bool DebouncedButtonB
+        {
+            get
+            {
+                return Model.ButtonBDebounced;
+            }
+            set
+            {
+                Model.ButtonBDebounced = value;
+                NotifyOfPropertyChange(() => DebouncedButtonB);
+            }
+        }
+        public bool DebouncedButtonX
+        {
+            get
+            {
+                return Model.ButtonXDebounced;
+            }
+            set
+            {
+                Model.ButtonXDebounced = value;
+                NotifyOfPropertyChange(() => DebouncedButtonX);
+            }
+        }
+        public bool DebouncedButtonY
+        {
+            get
+            {
+                return Model.ButtonYDebounced;
+            }
+            set
+            {
+                Model.ButtonYDebounced = value;
+                NotifyOfPropertyChange(() => DebouncedButtonY);
+
+            }
+        }
+        public bool DebouncedButtonRb
+        {
+            get
+            {
+                return Model.ButtonRbDebounced;
+            }
+            set
+            {
+                Model.ButtonRbDebounced = value;
+                NotifyOfPropertyChange(() => DebouncedButtonRb);
+            }
+        }
+        public bool DebouncedButtonLb
+        {
+            get
+            {
+                return Model.ButtonLbDebounced;
+            }
+            set
+            {
+                Model.ButtonLbDebounced = value;
+                NotifyOfPropertyChange(() => DebouncedButtonLb);
+            }
+        }
+        public bool DebouncedButtonRs
+        {
+            get
+            {
+                return Model.ButtonRsDebounced;
+            }
+            set
+            {
+                Model.ButtonRsDebounced = value;
+                NotifyOfPropertyChange(() => DebouncedButtonRs);
+            }
+        }
+        public bool DebouncedButtonLs
+        {
+            get
+            {
+                return Model.ButtonLsDebounced;
+            }
+            set
+            {
+                Model.ButtonLsDebounced = value;
+                NotifyOfPropertyChange(() => DebouncedButtonLs);
+            }
+        }
+        public bool DebouncedButtonStart
+        {
+            get
+            {
+                return Model.ButtonStartDebounced;
+            }
+            set
+            {
+                if (value) NextControlMode();
+                Model.ButtonStartDebounced = value;
+                NotifyOfPropertyChange(() => DebouncedButtonStart);
+            }
+        }
+        public bool DebouncedButtonBack
+        {
+            get
+            {
+                return Model.ButtonBackDebounced;
+            }
+            set
+            {
+                if (value) PreviousControlMode();
+                Model.ButtonBackDebounced = value;
+                NotifyOfPropertyChange(() => DebouncedButtonBack);
             }
         }
         public bool DPadL
@@ -278,7 +433,7 @@
             set
             {
                 Model.DPadL = value;
-                NotifyOfPropertyChangeThreadSafe(() => DPadL);
+                NotifyOfPropertyChange(() => DPadL);
             }
         }
         public bool DPadU
@@ -290,7 +445,7 @@
             set
             {
                 Model.DPadU = value;
-                NotifyOfPropertyChangeThreadSafe(() => DPadU);
+                NotifyOfPropertyChange(() => DPadU);
             }
         }
         public bool DPadR
@@ -302,7 +457,7 @@
             set
             {
                 Model.DPadR = value;
-                NotifyOfPropertyChangeThreadSafe(() => DPadR);
+                NotifyOfPropertyChange(() => DPadR);
             }
         }
         public bool DPadD
@@ -314,7 +469,7 @@
             set
             {
                 Model.DPadD = value;
-                NotifyOfPropertyChangeThreadSafe(() => DPadD);
+                NotifyOfPropertyChange(() => DPadD);
             }
         }
         #endregion
@@ -323,17 +478,20 @@
         {
             _controlCenter = cc;
 
-            ControllerModes.Add(new DriveControllerMode(this, _controlCenter));
-            ControllerModes.Add(new ArmControllerMode(this, _controlCenter));
-            ControllerModes.Add(new GripperControllerMode(this, _controlCenter));
+            ControllerModes.Add(new DriveControllerModeViewModel(this, _controlCenter));
+            ControllerModes.Add(new ArmControllerModeViewModel(this, _controlCenter));
             if (ControllerModes.Count == 0) throw new ArgumentException("IEnumerable 'modes' must have at least one item");
             CurrentModeIndex = 0;
+        }
 
-            // Initializes thread for reading controller input
-            var updater = new Timer(SerialReadSpeed);
-            updater.Elapsed += Update;
-            updater.Elapsed += EvaluateCurrentMode;
-            updater.Start();
+        public async void Start()
+        {
+            while (true)
+            {
+                Update();
+                EvaluateCurrentMode();
+                await Task.Delay(SerialReadSpeed);
+            }
         }
 
         public void NextControlMode()
@@ -349,7 +507,7 @@
             ControllerModes[CurrentModeIndex].EnterMode();
         }
 
-        private void Update(object sender, ElapsedEventArgs e)
+        private void Update()
         {
             if (ControllerOne == null || !ControllerOne.IsConnected)
             {
@@ -359,10 +517,11 @@
             var currentGamepad = ControllerOne.GetState().Gamepad;
             Connected = true;
 
-            JoyStick2X = currentGamepad.RightThumbX < Gamepad.RightThumbDeadZone && currentGamepad.RightThumbX > -Gamepad.RightThumbDeadZone ? 0 : (float)currentGamepad.RightThumbX / 32768;
-            JoyStick2Y = currentGamepad.RightThumbY < Gamepad.RightThumbDeadZone && currentGamepad.RightThumbY > -Gamepad.RightThumbDeadZone ? 0 : (float)currentGamepad.RightThumbY / 32768;
-            JoyStick1X = currentGamepad.LeftThumbX < Gamepad.LeftThumbDeadZone && currentGamepad.LeftThumbX > -Gamepad.LeftThumbDeadZone ? 0 : (float)currentGamepad.LeftThumbX / 32768;
-            JoyStick1Y = currentGamepad.LeftThumbY < Gamepad.LeftThumbDeadZone && currentGamepad.LeftThumbY > -Gamepad.LeftThumbDeadZone ? 0 : (float)currentGamepad.LeftThumbY / 32768;
+            var deadzone = AutoDeadzone ? Math.Max(Gamepad.LeftThumbDeadZone, Gamepad.RightThumbDeadZone) : ManualDeadzone;
+            JoyStick1X = currentGamepad.LeftThumbX < deadzone && currentGamepad.LeftThumbX > -deadzone ? 0 : ((currentGamepad.LeftThumbX + (currentGamepad.LeftThumbX < 0 ? deadzone : -deadzone)) / (float)(32768 - deadzone));
+            JoyStick1Y = currentGamepad.LeftThumbY < deadzone && currentGamepad.LeftThumbY > -deadzone ? 0 : ((currentGamepad.LeftThumbY + (currentGamepad.LeftThumbY < 0 ? deadzone : -deadzone)) / (float)(32768 - deadzone));
+            JoyStick2X = currentGamepad.RightThumbX < deadzone && currentGamepad.RightThumbX > -deadzone ? 0 : ((currentGamepad.RightThumbX + (currentGamepad.RightThumbX < 0 ? deadzone : -deadzone)) / (float)(32768 - deadzone));
+            JoyStick2Y = currentGamepad.RightThumbY < deadzone && currentGamepad.RightThumbY > -deadzone ? 0 : ((currentGamepad.RightThumbY + (currentGamepad.RightThumbY < 0 ? deadzone : -deadzone)) / (float)(32768 - deadzone));
 
             LeftTrigger = (float)currentGamepad.LeftTrigger / 255;
             RightTrigger = (float)currentGamepad.RightTrigger / 255;
@@ -382,18 +541,9 @@
             DPadD = (currentGamepad.Buttons & GamepadButtonFlags.DPadDown) != 0;
         }
 
-        private void EvaluateCurrentMode(object sender, ElapsedEventArgs e)
+        private void EvaluateCurrentMode()
         {
             ControllerModes[CurrentModeIndex].EvaluateMode();
-        }
-
-        /// <summary>
-        /// Wraps the Caliburn.Micro NotifyOfPropertyChange method to always perform on the UI thread.
-        /// </summary>
-        /// <param name="property">Name of the property</param>
-        private void NotifyOfPropertyChangeThreadSafe<T>(System.Linq.Expressions.Expression<Func<T>> property)
-        {
-            new System.Action(() => NotifyOfPropertyChange(property)).BeginOnUIThread();
         }
     }
 }

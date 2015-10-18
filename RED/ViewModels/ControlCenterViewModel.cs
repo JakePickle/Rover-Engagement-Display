@@ -8,6 +8,19 @@
     {
         private readonly ControlCenterModel _model;
 
+        public SettingsManagerViewModel SettingsManager
+        {
+            get
+            {
+                return _model._settingsManager;
+            }
+            set
+            {
+                _model._settingsManager = value;
+                NotifyOfPropertyChange(() => SettingsManager);
+            }
+        }
+
         public RemoveModuleStateViewModel RemoveModuleState
         {
             get
@@ -117,21 +130,96 @@
                 NotifyOfPropertyChange(() => Input);
             }
         }
+        public ScienceViewModel Science
+        {
+            get
+            {
+                return _model._science;
+            }
+            set
+            {
+                _model._science = value;
+                NotifyOfPropertyChange(() => Science);
+            }
+        }
+        public GPSViewModel GPS
+        {
+            get
+            {
+                return _model._GPS;
+            }
+            set
+            {
+                _model._GPS = value;
+                NotifyOfPropertyChange(() => GPS);
+            }
+        }
+        public SensorViewModel Sensor
+        {
+            get
+            {
+                return _model._sensor;
+            }
+            set
+            {
+                _model._sensor = value;
+                NotifyOfPropertyChange(() => Sensor);
+            }
+        }
+        public SensorCombinedViewModel SensorCombined
+        {
+            get
+            {
+                return _model._sensorCombined;
+            }
+            set
+            {
+                _model._sensorCombined = value;
+                NotifyOfPropertyChange(() => SensorCombined);
+
+            }
+        }
+
+        public DriveControllerModeViewModel DriveControllerMode
+        {
+            get
+            {
+                return (DriveControllerModeViewModel)Input.ControllerModes[0];
+            }
+        }
+        public ArmControllerModeViewModel ArmControllerMode
+        {
+            get
+            {
+                return (ArmControllerModeViewModel)Input.ControllerModes[1];
+            }
+        }
 
         public ControlCenterViewModel()
         {
             base.DisplayName = "Rover Engagement Display";
             _model = new ControlCenterModel();
+
             StateManager = new StateViewModel(this);
             Console = new ConsoleViewModel();
             DataRouter = new DataRouter();
-            MetadataManager = new MetadataManager();
+            MetadataManager = new MetadataManager(this);
+            MetadataManager.AddFromFile("NoSyncMetadata.xml");
+
             TcpAsyncServer = new AsyncTcpServerViewModel(11000, this);
             ModuleManager = new ModuleManagerViewModel(this);
             Input = new InputViewModel(this);
+            Science = new ScienceViewModel(this);
+            GPS = new GPSViewModel(this);
+            Sensor = new SensorViewModel(this);
+            SensorCombined = new SensorCombinedViewModel(this);
 
             RemoveModuleState = new RemoveModuleStateViewModel(this);
             SaveModuleState = new SaveModuleStateViewModel(ModuleManager.ModuleGrid, this);
+
+            SettingsManager = new SettingsManagerViewModel(this);
+
+            Input.Start();
 
             ModuleManager.ReloadModuleButtonContexts();
         }

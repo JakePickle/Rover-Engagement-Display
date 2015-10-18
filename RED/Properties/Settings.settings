@@ -20,5 +20,35 @@
     <Setting Name="ModuleStateSaveFileName" Type="System.String" Scope="User">
       <Value Profile="(Default)">ModuleStateSaves.xml</Value>
     </Setting>
+    <Setting Name="ServerListeningPort" Type="System.Int16" Scope="User">
+      <Value Profile="(Default)">11000</Value>
+    </Setting>
+    <Setting Name="DriveSpeedLimit" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1000</Value>
+    </Setting>
+    <Setting Name="DriveParabolicScaling" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="ScienceCCDPixelCount" Type="System.Int16" Scope="User">
+      <Value Profile="(Default)">3684</Value>
+    </Setting>
+    <Setting Name="ScienceCCDFilePath" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="InputSerialReadSpeed" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">90</Value>
+    </Setting>
+    <Setting Name="InputAutoDeadzone" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="InputManualDeadzone" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">5000</Value>
+    </Setting>
+    <Setting Name="GPSBaseStationLocationLatitude" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="GPSBaseStationLocationLongitude" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
